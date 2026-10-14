@@ -241,7 +241,78 @@ L('Divers', "Demande de rendez-vous", "Demande de rendez-vous",
 L('Divers', "Plainte", "Dépôt de plainte",
   "FAITS:Exposé des faits:a|DATE_FAITS:Date des faits:d|LIEU_FAITS:Lieu des faits|CONTRE:Contre qui (ou X)|TEMOINS:Témoins (facultatif)",
   "J'ai l'honneur de porter plainte contre [CONTRE] pour des faits survenus le [DATE_FAITS] à [LIEU_FAITS].\nVoici les faits : [FAITS].\nTémoins éventuels : [TEMOINS].\nJe sollicite l'ouverture d'une enquête et me tiens à votre disposition pour toute audition.",
-  "Monsieur le Commissaire de Police")
+  "Monsieur le Commissaire de Police"),
+
+/* ---------------- VENTE & COMMERCE (8) ---------------- */
+D('Vente & Commerce', "Attestation de vente", "VENDEUR:Nom du vendeur|ACHETEUR:Nom de l'acheteur|ARTICLE:Objet vendu (description):a|PRIX:Prix de vente (F CFA):m|DATE_VENTE:Date de la vente:d|MODE:Paiement:s:comptant,par acomptes",
+  "Je soussigné(e) [VENDEUR], atteste avoir vendu à Monsieur/Madame [ACHETEUR], le [DATE_VENTE], l'objet suivant : [ARTICLE].\nLa vente est conclue pour un prix de [PRIX] F CFA ([PRIX_L] francs CFA), payé [MODE].\nLe vendeur déclare que l'objet vendu est sa propriété, libre de tout gage ou litige, et en transfère la propriété à l'acheteur à compter de ce jour.\nLa présente attestation est établie pour servir et valoir ce que de droit.",
+  {sigs:[['Le vendeur','VENDEUR'],["L'acheteur",'ACHETEUR']]}),
+D('Vente & Commerce', "Contrat de vente", "VENDEUR:Nom du vendeur:t:@nom|ACHETEUR:Nom de l'acheteur|ARTICLE:Objet de la vente:a|PRIX:Prix (F CFA):m|DATE_VENTE:Date:d|LIVRAISON:Modalités de livraison",
+  "Entre [VENDEUR], ci-après le vendeur, et [ACHETEUR], ci-après l'acheteur, il a été convenu ce qui suit :\n## Article 1 : Objet\nLe vendeur vend à l'acheteur : [ARTICLE].\n## Article 2 : Prix\nLe prix est fixé à [PRIX] F CFA ([PRIX_L] francs CFA).\n## Article 3 : Livraison\n[LIVRAISON].\n## Article 4 : Transfert de propriété\nLa propriété est transférée à l'acheteur après paiement intégral du prix.\n## Article 5 : Litiges\nTout litige sera réglé à l'amiable ; à défaut, par les juridictions maliennes compétentes.",
+  {sigs:[['Le vendeur','VENDEUR'],["L'acheteur",'ACHETEUR']]}),
+D('Vente & Commerce', "Vente de véhicule / moto", "VENDEUR:Nom du vendeur|ACHETEUR:Nom de l'acheteur|TYPE:Type (moto, voiture...)|MARQUE:Marque et modèle|IMMAT:Immatriculation|CHASSIS:N° de châssis|PRIX:Prix (F CFA):m|DATE_VENTE:Date de la vente:d",
+  "Je soussigné(e) [VENDEUR], déclare avoir vendu à Monsieur/Madame [ACHETEUR], le [DATE_VENTE], le véhicule suivant : [TYPE] [MARQUE], immatriculé [IMMAT], châssis n° [CHASSIS].\nLa vente est conclue pour [PRIX] F CFA ([PRIX_L] francs CFA), payés intégralement.\nLe vendeur remet à l'acheteur les clés et les documents du véhicule, qui est vendu dans l'état où il se trouve.\nLa présente attestation est établie pour servir et valoir ce que de droit.",
+  {sigs:[['Le vendeur','VENDEUR'],["L'acheteur",'ACHETEUR']]}),
+{cat:'Vente & Commerce', titre:'Facture proforma', type:'f', lib:'FACTURE PROFORMA', art:'la présente facture proforma', champs:[]},
+D('Vente & Commerce', "Attestation de garantie", "CLIENT:Nom du client|ARTICLE:Article garanti:a|DATE_ACHAT:Date d'achat:d|DUREE:Durée de garantie (ex. 6 mois)",
+  "Je soussigné(e), [SIGNATAIRE], atteste que l'article suivant, vendu par [CYBER] à [CLIENT] le [DATE_ACHAT], est garanti pour une durée de [DUREE] : [ARTICLE].\nLa garantie couvre les défauts de fonctionnement. Elle ne couvre pas les dommages liés à une mauvaise utilisation, à la foudre, aux chocs ou à une intervention extérieure."),
+L('Vente & Commerce', "Demande de devis", "Demande de devis",
+  "OBJ_DEVIS:Produits / services souhaités:a|DELAI:Réponse souhaitée avant le",
+  "Nous souhaitons recevoir un devis détaillé pour : [OBJ_DEVIS].\nNous vous prions de nous le faire parvenir avant le [DELAI], en précisant les prix unitaires, les délais de livraison et les conditions de paiement.",
+  "Monsieur le Directeur Commercial"),
+L('Vente & Commerce', "Lettre de commande", "Commande de marchandises",
+  "ARTICLES:Articles et quantités:a|LIVRAISON:Lieu et délai de livraison|PAIEMENT:Mode de paiement",
+  "Suite à votre offre, nous vous passons commande de : [ARTICLES].\nLivraison souhaitée : [LIVRAISON]. Paiement : [PAIEMENT].\nNous vous prions de bien vouloir nous confirmer cette commande.",
+  "Monsieur le Directeur Commercial", FIN_NOUS, true),
+L('Vente & Commerce', "Présentation de services", "Présentation de nos services",
+  "SERVICES:Vos services:a:Impression, photocopie, saisie de documents\nVente de matériel informatique\nMaintenance et dépannage",
+  "[CYBER] est une structure spécialisée en informatique, située à [CYBER_ADRESSE].\nNous vous proposons les services suivants : [SERVICES].\nNous restons à votre disposition au [CYBER_TEL] pour tout renseignement ou devis gratuit.",
+  "Monsieur le Directeur", FIN_NOUS, true),
+
+/* ---------------- IMMOBILIER (4) ---------------- */
+D('Immobilier', "Cession de parcelle", "VENDEUR:Nom du vendeur|ACHETEUR:Nom de l'acheteur|PARCELLE:Description (lot, superficie, quartier):a|TITRE:Pièce justificative (titre, permis...)|PRIX:Prix (F CFA):m|DATE_VENTE:Date:d",
+  "Je soussigné(e) [VENDEUR], cède à Monsieur/Madame [ACHETEUR], le [DATE_VENTE], la parcelle suivante : [PARCELLE], justifiée par : [TITRE].\nLa cession est conclue pour [PRIX] F CFA ([PRIX_L] francs CFA), payés ce jour.\nLe vendeur garantit être le propriétaire légitime et que la parcelle est libre de tout litige.\nLe présent acte devra être régularisé auprès des services compétents (notaire, domaines).",
+  {sigs:[['Le vendeur','VENDEUR'],["L'acquéreur",'ACHETEUR']]}),
+D('Immobilier', "Quittance de loyer", "BAILLEUR:Nom du bailleur|LOCATAIRE:Nom du locataire|PERIODE:Période (ex. mois de novembre 2026)|LOYER:Montant reçu (F CFA):m|ADRESSE_BIEN:Adresse du bien",
+  "Je soussigné(e) [BAILLEUR], propriétaire du bien situé à [ADRESSE_BIEN], reconnais avoir reçu de Monsieur/Madame [LOCATAIRE] la somme de [LOYER] F CFA ([LOYER_L] francs CFA), au titre du loyer de la période : [PERIODE].\nLa présente quittance est délivrée pour servir et valoir ce que de droit.",
+  {tdoc:"QUITTANCE DE LOYER", sigs:[['Le bailleur','BAILLEUR']]}),
+L('Immobilier', "Préavis de départ (logement)", "Préavis de départ du logement",
+  "ADRESSE_BIEN:Adresse du logement|DATE_DEPART:Date de départ:d|PREAVIS:Préavis (ex. 3 mois)",
+  "J'ai l'honneur de vous informer de ma décision de quitter le logement que j'occupe à [ADRESSE_BIEN].\nLe préavis de [PREAVIS] commence à la réception de la présente et mon départ aura lieu le [DATE_DEPART].\nJe vous propose de fixer une date pour l'état des lieux et la restitution de la caution.",
+  "Monsieur le Propriétaire"),
+L('Immobilier', "Demande de raccordement (eau / électricité)", "Demande de raccordement",
+  "TYPE:Type de raccordement:s:à l'eau,à l'électricité|USAGE:Usage:s:domestique,commercial|ADRESSE_BR:Adresse à raccorder",
+  "J'ai l'honneur de solliciter un raccordement [TYPE] à usage [USAGE] pour le local situé à [ADRESSE_BR].\nJe m'engage à régler les frais de raccordement et à respecter les conditions d'abonnement.",
+  "Monsieur le Directeur de l'agence"),
+
+/* ---------------- EMPLOI (+4) ---------------- */
+D('Emploi', "Attestation de stage", "STAGIAIRE:Nom du stagiaire|ECOLE:Établissement|SERVICE:Service / domaine|DU:Début:d|AU:Fin:d|APPRECIATION:Appréciation:a",
+  "Je soussigné(e), [SIGNATAIRE], atteste que Monsieur/Madame [STAGIAIRE], étudiant(e) à [ECOLE], a effectué un stage au sein de [CYBER], dans le domaine : [SERVICE], du [DU] au [AU].\nAppréciation : [APPRECIATION].\nLa présente attestation lui est délivrée pour servir et valoir ce que de droit."),
+D('Emploi', "Attestation de présence", "PERSONNE:Nom de la personne|EVENEMENT:Événement / formation|DATE_EV:Date:d",
+  "Je soussigné(e), [SIGNATAIRE], atteste que Monsieur/Madame [PERSONNE] était présent(e) à : [EVENEMENT], le [DATE_EV].\nLa présente attestation est délivrée pour servir et valoir ce que de droit."),
+D('Emploi', "Attestation de prise de service", "AGENT:Nom de l'agent|POSTE:Poste|DATE_PS:Date de prise de service:d|STRUCTURE:Structure:t:@nom",
+  "Je soussigné(e), [SIGNATAIRE], atteste que Monsieur/Madame [AGENT] a pris service le [DATE_PS] en qualité de [POSTE] au sein de [STRUCTURE].\nLa présente attestation est établie pour servir et valoir ce que de droit."),
+L('Emploi', "Lettre de licenciement", "Notification de licenciement",
+  "MOTIF:Motif du licenciement:a|DATE_EFFET:Date d'effet:d|PREAVIS:Préavis (ex. 1 mois)",
+  "Nous vous informons de notre décision de mettre fin au contrat de travail qui nous lie, pour le motif suivant : [MOTIF].\nCette décision prend effet le [DATE_EFFET], sous réserve du préavis de [PREAVIS] prévu par le Code du travail.\nVous voudrez bien restituer le matériel et les documents de l'entreprise. Vos droits seront calculés conformément à la loi.",
+  "Monsieur/Madame", FIN_NOUS, true),
+
+/* ---------------- ADMINISTRATION (+5) ---------------- */
+D('Administration', "Déclaration de perte", "OBJET_PERDU:Objet ou document perdu:a|DATE_PERTE:Date de la perte:d|LIEU_PERTE:Lieu de la perte|ADRESSE_DEC:Votre adresse",
+  "Je soussigné(e) [SIGNATAIRE], demeurant à [ADRESSE_DEC], déclare avoir perdu le [DATE_PERTE], à [LIEU_PERTE] : [OBJET_PERDU].\nJe fais la présente déclaration pour servir et valoir ce que de droit."),
+D('Administration', "Déclaration sur l'honneur", "NAISS:Date et lieu de naissance|ADRESSE_DEC:Adresse|DECLARATION:Contenu de la déclaration:a",
+  "Je soussigné(e) [SIGNATAIRE], né(e) le [NAISS], demeurant à [ADRESSE_DEC], déclare sur l'honneur que : [DECLARATION].\nJe suis conscient(e) que toute fausse déclaration m'expose aux sanctions prévues par la loi."),
+D('Administration', "Procès-verbal de réunion", "OBJ_REUNION:Objet de la réunion|DATE_REU:Date:d|LIEU_REUNION:Lieu|PARTICIPANTS:Participants:a|DECISIONS:Décisions prises:a|PRESIDENT:Président de séance|SECRETAIRE:Secrétaire",
+  "Le [DATE_REU], à [LIEU_REUNION], une réunion s'est tenue sous la présidence de [PRESIDENT] sur le sujet : [OBJ_REUNION].\nParticipants : [PARTICIPANTS].\nAprès discussion, les décisions suivantes ont été prises : [DECISIONS].\nLa séance est levée et le présent procès-verbal est établi pour servir et valoir ce que de droit.",
+  {sigs:[['Le président de séance','PRESIDENT'],['Le secrétaire','SECRETAIRE']]}),
+L('Administration', "Demande de passeport / carte d'identité", "Demande de document d'identité",
+  "TYPE:Document demandé:s:un passeport,une carte d'identité biométrique|NAISS:Date et lieu de naissance|PERE:Nom du père|MERE:Nom de la mère|MOTIF:Motif (première demande, renouvellement, perte)",
+  "Né(e) le [NAISS], fils/fille de [PERE] et de [MERE], j'ai l'honneur de solliciter la délivrance de [TYPE].\nMotif de la demande : [MOTIF].\nJe joins à la présente les pièces exigées par le service.",
+  "Monsieur le Directeur du service compétent"),
+L('Administration', "Demande de légalisation de documents", "Demande de légalisation",
+  "DOCS:Documents à légaliser:a",
+  "J'ai l'honneur de solliciter la légalisation des documents suivants : [DOCS].\nJe m'engage à m'acquitter des frais exigés.",
+  "Monsieur le Maire")
 ];
 
 /* ==================================================================
@@ -373,6 +444,10 @@ function construire(m, v){
    ================================================================== */
 let modele = null, blocs = null;
 
+// Numérotation automatique (FAC-2026-0001, DEV-2026-0001...) mémorisée localement
+const NUMS = {'FACTURE':'FAC','DEVIS':'DEV','FACTURE PROFORMA':'PRO','BON DE COMMANDE':'BC','BON DE LIVRAISON':'BL'};
+const prochainNum = lib => `${NUMS[lib] || 'DOC'}-${new Date().getFullYear()}-${String(LS.get('num_' + lib, 1)).padStart(4, '0')}`;
+
 // Champs communs selon le type de modèle + champs propres au modèle
 function champsDe(m){
   const jour = new Date().toISOString().slice(0, 10);
@@ -389,7 +464,7 @@ function champsDe(m){
     c = [F('LIEU', 'Ville', 't', '@ville'), F('DATE', 'Date', 'd', jour), F('REF', 'N° / Référence (facultatif)')];
     if (!m.sigs) c.push(F('SIGNATAIRE', 'Nom du signataire'));
   } else if (m.type === 'f') {
-    c = [F('NUMERO', 'Numéro', 't', jour.replace(/-/g, '').slice(2)), F('LIEU', 'Ville', 't', '@ville'), F('DATE', 'Date', 'd', jour),
+    c = [F('NUMERO', 'Numéro', 't', prochainNum(m.lib)), F('LIEU', 'Ville', 't', '@ville'), F('DATE', 'Date', 'd', jour),
          F('CLIENT', m.lib === 'BON DE COMMANDE' ? 'Fournisseur' : 'Client'), F('ADRESSE_CL', 'Adresse (facultatif)'), F('NIF_CL', 'NIF (facultatif)')];
     if (!m.noprix) c.push(F('TVA', 'TVA (%)', 's', '0,18'));
     if (m.lib === 'FACTURE') c.push(F('MODE', 'Mode de paiement', 's', 'Espèces,Orange Money,Moov Money,Virement,Chèque'));
@@ -535,7 +610,7 @@ async function telechargerWord(){
       ]})]}),
     new Paragraph({border: {bottom: {style: BorderStyle.SINGLE, size: 8, color: BLEU, space: 1}}, children: []})
   ]});
-  const basPage = new Footer({children: [new Paragraph({alignment: AlignmentType.CENTER, border: {top: {style: BorderStyle.SINGLE, size: 6, color: BLEU, space: 4}}, children: [new TextRun({text: pied(), size: 18})]})]});
+  const basPage = new Footer({children: [new Paragraph({alignment: AlignmentType.CENTER, border: {top: {style: BorderStyle.SINGLE, size: 6, color: BLEU, space: 4}}, children: [new TextRun({text: pied(), size: 18})]}), new Paragraph({alignment: AlignmentType.CENTER, children: [new TextRun({children: ['Page ', docx.PageNumber.CURRENT, ' / ', docx.PageNumber.TOTAL_PAGES], size: 18})]})]});
 
   const doc = new Document({
     creator: P.nom, title: modele.titre,
@@ -555,6 +630,7 @@ async function telechargerWord(){
    8. ACCUEIL : recherche + catégories
    ================================================================== */
 let catActive = 'Tous';
+const ICO = {'Emploi':'💼','Administration':'🏛️','Entreprise Cyber':'🖨️','Scolaire':'🎓','Divers':'✉️','Vente & Commerce':'🛒','Immobilier':'🏠'};
 function afficherAccueil(){
   const cats = ['Tous', ...new Set(MODELES.map(m => m.cat))];
   $('#cats').innerHTML = cats.map(c => `<button class="${c === catActive ? 'on' : ''}" data-c="${esc(c)}">${esc(c)}${c === 'Tous' ? ' (' + MODELES.length + ')' : ''}</button>`).join('');
@@ -562,7 +638,7 @@ function afficherAccueil(){
   const q = norm($('#recherche').value.trim());
   $('#liste').innerHTML = MODELES.map((m, i) => ({m, i}))
     .filter(({m}) => (catActive === 'Tous' || m.cat === catActive) && (!q || norm(m.titre + ' ' + m.cat).includes(q)))
-    .map(({m, i}) => `<button class="carte" data-i="${i}"><b>${esc(m.titre)}</b><small>${esc(m.cat)}</small></button>`).join('')
+    .map(({m, i}) => `<button class="carte" data-i="${i}"><b>${ICO[m.cat] || '📄'} ${esc(m.titre)}</b><small>${esc(m.cat)}</small></button>`).join('')
     || '<p>Aucun modèle trouvé.</p>';
   $$('#liste .carte').forEach(b => b.onclick = () => ouvrir(+b.dataset.i));
 }
@@ -579,7 +655,9 @@ function majCompteur(){ $('#cptImp').textContent = cpt; $('#prix').value = prix;
 $('#recherche').oninput = afficherAccueil;
 $('#btnRetour').onclick = () => { $('#vueForm').hidden = true; $('#vueAccueil').hidden = false; };
 $('#btnGen').onclick = () => {
-  blocs = construire(modele, lire());
+  const v = lire();
+  if (modele.type === 'f' && v.NUMERO === prochainNum(modele.lib)) LS.set('num_' + modele.lib, LS.get('num_' + modele.lib, 1) + 1);
+  blocs = construire(modele, v);
   const a = $('#apercu'); a.innerHTML = apercuHtml(blocs); a.hidden = false;
   $('#btnWord').hidden = $('#btnPrint').hidden = false;
   a.scrollIntoView({behavior: 'smooth'});
