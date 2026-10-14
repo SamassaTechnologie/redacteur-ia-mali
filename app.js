@@ -551,6 +551,22 @@ function apercuHtml(B){
    7. EXPORT WORD (.docx) avec docx.js — modifiable dans Word
    Times New Roman 12, marges 2,5 cm, en-tête logo, pied de page adresse
    ================================================================== */
+// Chargement de docx.js avec plusieurs sources de secours (local, jsDelivr, unpkg)
+function chargerScript(url){
+  return new Promise((ok, ko) => {
+    const el = document.createElement('script'); el.src = url;
+    if (url.startsWith('http')) el.crossOrigin = 'anonymous';   // permet la mise en cache hors ligne
+    el.onload = ok; el.onerror = () => { el.remove(); ko(); };
+    document.head.appendChild(el);
+  });
+}
+async function assurerDocx(){
+  if (typeof docx !== 'undefined') return true;
+  const sources = ['libs/docx.js', 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js', 'https://unpkg.com/docx@8.5.0/build/index.js'];
+  for (const u of sources) { try { await chargerScript(u); if (typeof docx !== 'undefined') return true; } catch (e) {} }
+  return false;
+}
+
 let logoCache = null;
 async function logoInfo(){
   if (logoCache) return logoCache;
@@ -564,7 +580,7 @@ async function logoInfo(){
 }
 
 async function telechargerWord(){
-  if (typeof docx === 'undefined') { alert("La bibliothèque Word n'est pas chargée. Connectez-vous à Internet une première fois (ou placez libs/docx.js)."); return; }
+  if (!(await assurerDocx())) { alert("Impossible de charger la bibliothèque Word. Vérifiez votre connexion Internet puis réessayez (le premier chargement nécessite Internet)."); return; }
   const {Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, ShadingType, ImageRun, Header, Footer, Packer} = docx;
   const AL = {left: AlignmentType.LEFT, center: AlignmentType.CENTER, right: AlignmentType.RIGHT, both: AlignmentType.JUSTIFIED};
   const BLEU = '1AA7E8', TW = 9072; // largeur utile A4 avec marges 2,5 cm (en twips)
@@ -694,3 +710,4 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 if (LS.get('logo', null)) $('.brand img').src = LS.get('logo');
 majCompteur();
 afficherAccueil();
+assurerDocx();   // précharge la bibliothèque Word
