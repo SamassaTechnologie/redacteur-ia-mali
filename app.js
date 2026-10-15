@@ -707,27 +707,13 @@ function apercuHtml(B){
 }
 
 /* ==================================================================
-   7. EXPORT WORD (.docx) avec docx.js — modifiable dans Word
-   Times New Roman 12, marges 2,5 cm, en-tête logo, pied de page adresse
+   7. EXPORT WORD (.docx) — générateur INTÉGRÉ, sans aucune bibliothèque
+   ni connexion Internet. Un .docx est une archive ZIP de fichiers XML :
+   on écrit donc nous-mêmes le ZIP (sans compression) et le XML Word.
+   Times New Roman 12, marges 2,5 cm, en-tête logo, pied de page + pagination.
    ================================================================== */
-// Chargement de docx.js avec plusieurs sources de secours (local, jsDelivr, unpkg)
-function chargerScript(url){
-  return new Promise((ok, ko) => {
-    const el = document.createElement('script'); el.src = url;
-    if (url.startsWith('http')) el.crossOrigin = 'anonymous';   // permet la mise en cache hors ligne
-    el.onload = ok; el.onerror = () => { el.remove(); ko(); };
-    document.head.appendChild(el);
-  });
-}
-async function assurerDocx(){
-  if (typeof docx !== 'undefined') return true;
-  const sources = ['libs/docx.js', 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js', 'https://unpkg.com/docx@8.5.0/build/index.js'];
-  for (const u of sources) { try { await chargerScript(u); if (typeof docx !== 'undefined') return true; } catch (e) {} }
-  return false;
-}
-
 let logoCache = null;
-async function logoInfo(){
+async function logoInfo(){ // logo (PNG) + dimensions, pour l'en-tête Word
   if (logoCache) return logoCache;
   const src = LS.get('logo', null) || 'logo.png';
   try {
@@ -738,67 +724,88 @@ async function logoInfo(){
   return logoCache;
 }
 
+/* --- 7a. Écriture d'un fichier ZIP (méthode "stockée", sans compression) --- */
+const utf8 = s => new TextEncoder().encode(s);
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = d => { let c = 0xFFFFFFFF; for (let i = 0; i < d.length; i++) c = CRC_T[(c ^ d[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function creerZip(fichiers){ // fichiers : [{n: 'chemin', d: Uint8Array}]
+  const parts = [], central = []; let off = 0;
+  const heure = 0, date = ((2026 - 1980) << 9) | (1 << 5) | 1;
+  fichiers.forEach(f => {
+    const nom = utf8(f.n), crc = crc32(f.d), L = new DataView(new ArrayBuffer(30)), C = new DataView(new ArrayBuffer(46));
+    L.setUint32(0, 0x04034b50, true); L.setUint16(4, 20, true); L.setUint16(6, 0x0800, true); L.setUint16(10, heure, true); L.setUint16(12, date, true);
+    L.setUint32(14, crc, true); L.setUint32(18, f.d.length, true); L.setUint32(22, f.d.length, true); L.setUint16(26, nom.length, true);
+    C.setUint32(0, 0x02014b50, true); C.setUint16(4, 20, true); C.setUint16(6, 20, true); C.setUint16(8, 0x0800, true); C.setUint16(12, heure, true); C.setUint16(14, date, true);
+    C.setUint32(16, crc, true); C.setUint32(20, f.d.length, true); C.setUint32(24, f.d.length, true); C.setUint16(28, nom.length, true); C.setUint32(42, off, true);
+    parts.push(new Uint8Array(L.buffer), nom, f.d); central.push(new Uint8Array(C.buffer), nom);
+    off += 30 + nom.length + f.d.length;
+  });
+  const cd = central.reduce((n, x) => n + x.length, 0), E = new DataView(new ArrayBuffer(22));
+  E.setUint32(0, 0x06054b50, true); E.setUint16(8, fichiers.length, true); E.setUint16(10, fichiers.length, true); E.setUint32(12, cd, true); E.setUint32(16, off, true);
+  return new Blob([...parts, ...central, new Uint8Array(E.buffer)], {type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+
+/* --- 7b. Génération du XML Word à partir des blocs --- */
+const xe = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
+const XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+const BLEU = '1AA7E8', TW = 9072;   // TW = largeur utile en twips (A4 moins marges 2,5 cm)
+const runX = r => String(r.x).split('\n').map((t, i) =>
+  `<w:r><w:rPr>${r.b ? '<w:b/>' : ''}${r.i ? '<w:i/>' : ''}${r.c ? `<w:color w:val="${r.c}"/>` : ''}${r.sz ? `<w:sz w:val="${r.sz}"/><w:szCs w:val="${r.sz}"/>` : ''}${r.u ? '<w:u w:val="single"/>' : ''}</w:rPr>${i ? '<w:br/>' : ''}<w:t xml:space="preserve">${xe(t)}</w:t></w:r>`).join('');
+const paraX = b => b.raw ? b.raw :
+  `<w:p><w:pPr>${b.bb ? `<w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="${BLEU}"/></w:pBdr>` : ''}<w:spacing w:before="${(b.sb || 0) * 20}" w:after="${(b.sa ?? 6) * 20}" w:line="276" w:lineRule="auto"/>${(b.ind || b.fi) ? `<w:ind w:left="${b.ind || 0}"${b.fi ? ' w:firstLine="567"' : ''}/>` : ''}<w:jc w:val="${b.al || 'left'}"/></w:pPr>${(b.runs || []).map(runX).join('')}</w:p>`;
+const tableX = t => {
+  const v = t.bord ? 'single' : 'nil', w = t.w.map(x => Math.round(TW * x / 100));
+  const bd = ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(s => `<w:${s} w:val="${v}" w:sz="4" w:space="0" w:color="444444"/>`).join('');
+  return `<w:tbl><w:tblPr><w:tblW w:w="${TW}" w:type="dxa"/><w:tblBorders>${bd}</w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${w.map(x => `<w:gridCol w:w="${x}"/>`).join('')}</w:tblGrid>`
+    + t.rows.map(r => '<w:tr>' + r.map((c, i) => `<w:tc><w:tcPr><w:tcW w:w="${w[i]}" w:type="dxa"/>${c.fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${c.fill}"/>` : ''}<w:tcMar><w:top w:w="60" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="60" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar></w:tcPr>${c.blocs.map(paraX).join('')}</w:tc>`).join('') + '</w:tr>').join('') + '</w:tbl>';
+};
+const imageX = (cx, cy) => `<w:p><w:pPr><w:spacing w:after="0"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="1" name="Logo"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+
+function construireDocx(B, logo){
+  // Corps du document (un paragraphe vide sépare deux tableaux collés, sinon Word les fusionne)
+  let corps = '', precTable = false;
+  B.forEach(b => {
+    if (b.tbl) { if (precTable) corps += '<w:p><w:pPr><w:spacing w:after="0"/></w:pPr></w:p>'; corps += tableX(b.tbl); precTable = true; }
+    else { corps += paraX(b); precTable = false; }
+  });
+  if (precTable) corps += '<w:p/>';
+  const document_ = `${XML}<w:document ${NS}><w:body>${corps}<w:sectPr><w:headerReference w:type="default" r:id="rIdH"/><w:footerReference w:type="default" r:id="rIdF"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+
+  // En-tête : [LOGO CYBER] + nom, slogan, contacts, puis filet bleu
+  const cLogo = logo ? imageX(Math.round(55 * logo.w / logo.h * 9525), 55 * 9525) : paraX({runs: [{x: '[LOGO CYBER]', c: '999999'}], sa: 0});
+  const entete = `${XML}<w:hdr ${NS}>` + tableX({w: [18, 82], rows: [[{blocs: [{raw: cLogo}]}, {blocs: [
+    {runs: [{x: P.nom, b: true, c: '0B6FB8', sz: 30}], sa: 0}, {runs: [{x: P.slogan, i: true, sz: 20}], sa: 0}, {runs: [{x: `Tél : ${P.tel} – ${P.email}`, sz: 18}], sa: 0}]}]]})
+    + paraX({runs: [], bb: true, sa: 0}) + '</w:hdr>';
+
+  // Pied de page : adresse + "Page X / Y"
+  const pt = t => `<w:r><w:rPr><w:sz w:val="18"/></w:rPr><w:t xml:space="preserve">${xe(t)}</w:t></w:r>`;
+  const champ = c => `<w:fldSimple w:instr=" ${c} "><w:r><w:rPr><w:sz w:val="18"/></w:rPr><w:t>1</w:t></w:r></w:fldSimple>`;
+  const pied_ = `${XML}<w:ftr ${NS}><w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="6" w:space="4" w:color="${BLEU}"/></w:pBdr><w:spacing w:after="0"/><w:jc w:val="center"/></w:pPr>${pt(pied())}</w:p>`
+    + `<w:p><w:pPr><w:spacing w:after="0"/><w:jc w:val="center"/></w:pPr>${pt('Page ')}${champ('PAGE')}${pt(' / ')}${champ('NUMPAGES')}</w:p></w:ftr>`;
+
+  const styles = `${XML}<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman" w:eastAsia="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="fr-FR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style></w:styles>`;
+  const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships', PK = 'http://schemas.openxmlformats.org/package/2006/relationships';
+  const types = `${XML}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>`;
+  const rels = `${XML}<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="word/document.xml"/></Relationships>`;
+  const docRels = `${XML}<Relationships xmlns="${PK}"><Relationship Id="rIdS" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rIdH" Type="${R}/header" Target="header1.xml"/><Relationship Id="rIdF" Type="${R}/footer" Target="footer1.xml"/></Relationships>`;
+  const f = [{n: '[Content_Types].xml', d: utf8(types)}, {n: '_rels/.rels', d: utf8(rels)}, {n: 'word/document.xml', d: utf8(document_)}, {n: 'word/_rels/document.xml.rels', d: utf8(docRels)},
+             {n: 'word/styles.xml', d: utf8(styles)}, {n: 'word/header1.xml', d: utf8(entete)}, {n: 'word/footer1.xml', d: utf8(pied_)}];
+  if (logo) {
+    f.push({n: 'word/_rels/header1.xml.rels', d: utf8(`${XML}<Relationships xmlns="${PK}"><Relationship Id="rIdLogo" Type="${R}/image" Target="media/logo.png"/></Relationships>`)});
+    f.push({n: 'word/media/logo.png', d: logo.data});
+  }
+  return creerZip(f);
+}
+
 async function telechargerWord(){
-  if (!(await assurerDocx())) { alert("Impossible de charger la bibliothèque Word. Vérifiez votre connexion Internet puis réessayez (le premier chargement nécessite Internet)."); return; }
-  const {Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, ShadingType, ImageRun, Header, Footer, Packer} = docx;
-  const AL = {left: AlignmentType.LEFT, center: AlignmentType.CENTER, right: AlignmentType.RIGHT, both: AlignmentType.JUSTIFIED};
-  const BLEU = '1AA7E8', TW = 9072; // largeur utile A4 avec marges 2,5 cm (en twips)
-  const none = {style: BorderStyle.NONE, size: 0, color: 'FFFFFF'}, ligne = {style: BorderStyle.SINGLE, size: 4, color: '444444'};
-  const runs = rs => rs.flatMap(r => String(r.x).split('\n').map((t, i) => new TextRun({text: t, break: i ? 1 : 0, bold: r.b, italics: r.i, underline: r.u ? {} : undefined, size: r.sz, color: r.c})));
-
-  const para = b => new Paragraph({
-    alignment: AL[b.al || 'left'], children: runs(b.runs),
-    spacing: {before: (b.sb || 0) * 20, after: (b.sa ?? 6) * 20, line: 276},
-    indent: {left: b.ind || undefined, firstLine: b.fi ? 567 : undefined},
-    border: b.bb ? {bottom: {style: BorderStyle.SINGLE, size: 6, color: BLEU, space: 1}} : undefined
-  });
-  const tableau = t => new Table({
-    width: {size: TW, type: WidthType.DXA}, columnWidths: t.w.map(x => Math.round(TW * x / 100)),
-    borders: t.bord ? undefined : {top: none, bottom: none, left: none, right: none, insideHorizontal: none, insideVertical: none},
-    rows: t.rows.map(r => new TableRow({children: r.map((c, i) => new TableCell({
-      width: {size: Math.round(TW * t.w[i] / 100), type: WidthType.DXA},
-      borders: t.bord ? {top: ligne, bottom: ligne, left: ligne, right: ligne} : {top: none, bottom: none, left: none, right: none},
-      shading: c.fill ? {type: ShadingType.CLEAR, color: 'auto', fill: c.fill} : undefined,
-      margins: {top: 60, bottom: 60, left: 80, right: 80},
-      children: c.blocs.map(para)
-    }))}))
-  });
-  const enfants = blocs.map(b => b.tbl ? tableau(b.tbl) : para(b));
-
-  // En-tête : [LOGO CYBER] + nom, slogan, contacts
-  const logo = await logoInfo();
-  const cLogo = logo
-    ? new Paragraph({children: [new ImageRun({data: logo.data, transformation: {width: Math.round(55 * logo.w / logo.h), height: 55}})]})
-    : new Paragraph({children: [new TextRun({text: '[LOGO CYBER]', color: '999999'})]});
-  const cTxt = [
-    new Paragraph({spacing: {after: 0}, children: [new TextRun({text: P.nom, bold: true, size: 30, color: '0B6FB8'})]}),
-    new Paragraph({spacing: {after: 0}, children: [new TextRun({text: P.slogan, italics: true, size: 20})]}),
-    new Paragraph({spacing: {after: 0}, children: [new TextRun({text: `Tél : ${P.tel} – ${P.email}`, size: 18})]})
-  ];
-  const entete = new Header({children: [
-    new Table({
-      width: {size: TW, type: WidthType.DXA}, columnWidths: [1600, TW - 1600],
-      borders: {top: none, bottom: none, left: none, right: none, insideHorizontal: none, insideVertical: none},
-      rows: [new TableRow({children: [
-        new TableCell({width: {size: 1600, type: WidthType.DXA}, borders: {top: none, bottom: none, left: none, right: none}, children: [cLogo]}),
-        new TableCell({width: {size: TW - 1600, type: WidthType.DXA}, borders: {top: none, bottom: none, left: none, right: none}, children: cTxt})
-      ]})]}),
-    new Paragraph({border: {bottom: {style: BorderStyle.SINGLE, size: 8, color: BLEU, space: 1}}, children: []})
-  ]});
-  const basPage = new Footer({children: [new Paragraph({alignment: AlignmentType.CENTER, border: {top: {style: BorderStyle.SINGLE, size: 6, color: BLEU, space: 4}}, children: [new TextRun({text: pied(), size: 18})]}), new Paragraph({alignment: AlignmentType.CENTER, children: [new TextRun({children: ['Page ', docx.PageNumber.CURRENT, ' / ', docx.PageNumber.TOTAL_PAGES], size: 18})]})]});
-
-  const doc = new Document({
-    creator: P.nom, title: modele.titre,
-    styles: {default: {document: {run: {font: 'Times New Roman', size: 24}}}},
-    sections: [{
-      properties: {page: {size: {width: 11906, height: 16838}, margin: {top: 1417, right: 1417, bottom: 1417, left: 1417, header: 567, footer: 567}}},
-      headers: {default: entete}, footers: {default: basPage}, children: enfants
-    }]
-  });
-  const blob = await Packer.toBlob(doc);
-  const nom = norm(modele.titre).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') + '_' + new Date().toISOString().slice(0, 10) + '.docx';
-  if (window.saveAs) saveAs(blob, nom);
-  else { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nom; a.click(); }
+  try {
+    const blob = construireDocx(blocs, await logoInfo());
+    const nom = norm(modele.titre).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') + '_' + new Date().toISOString().slice(0, 10) + '.docx';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = nom; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  } catch (e) { alert("Erreur lors de la création du fichier Word : " + e.message); }
 }
 
 /* ==================================================================
@@ -869,4 +876,3 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 if (LS.get('logo', null)) $('.brand img').src = LS.get('logo');
 majCompteur();
 afficherAccueil();
-assurerDocx();   // précharge la bibliothèque Word
