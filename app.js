@@ -312,7 +312,166 @@ L('Administration', "Demande de passeport / carte d'identité", "Demande de docu
 L('Administration', "Demande de légalisation de documents", "Demande de légalisation",
   "DOCS:Documents à légaliser:a",
   "J'ai l'honneur de solliciter la légalisation des documents suivants : [DOCS].\nJe m'engage à m'acquitter des frais exigés.",
-  "Monsieur le Maire")
+  "Monsieur le Maire"),
+
+/* ---------------- BANQUE & FINANCE (5) ---------------- */
+L('Banque & Finance', "Ouverture de compte bancaire", "Demande d'ouverture de compte",
+  "TYPE:Type de compte:s:courant,épargne,professionnel|NAISS:Date et lieu de naissance|PROFESSION:Profession|PJ:Pièces jointes:a:Copie de la pièce d'identité\nCertificat de résidence\nPhotos d'identité",
+  "Né(e) le [NAISS], exerçant la profession de [PROFESSION], j'ai l'honneur de solliciter l'ouverture d'un compte [TYPE] dans les livres de votre établissement.\nJe m'engage à respecter les conditions de fonctionnement du compte et à fournir toutes les pièces exigées.",
+  "Monsieur le Directeur de la Banque"),
+L('Banque & Finance', "Fermeture de compte bancaire", "Demande de clôture de compte",
+  "N_CPT:Numéro du compte|MOTIF:Motif de la clôture|SOLDE:Destination du solde (virement, retrait en espèces)",
+  "Titulaire du compte n° [N_CPT] ouvert dans vos livres, j'ai l'honneur de solliciter sa clôture pour le motif suivant : [MOTIF].\nJe vous prie de bien vouloir remettre le solde par la voie suivante : [SOLDE], après déduction des frais éventuels, et de me délivrer un quitus de clôture.",
+  "Monsieur le Directeur de la Banque"),
+L('Banque & Finance', "Demande de crédit / prêt", "Demande de crédit",
+  "N_CPT:Numéro de compte|MONTANT:Montant demandé (F CFA):m|OBJ_CREDIT:Objet du crédit|DUREE:Durée de remboursement|REVENU:Revenu mensuel (F CFA):m",
+  "Titulaire du compte n° [N_CPT], j'ai l'honneur de solliciter un crédit de [MONTANT] F CFA ([MONTANT_L] francs CFA) destiné à : [OBJ_CREDIT].\nMon revenu mensuel est de [REVENU] F CFA et je propose un remboursement sur [DUREE].\nJe me tiens à votre disposition pour fournir tout justificatif.",
+  "Monsieur le Directeur de la Banque"),
+L('Banque & Finance', "Demande de relevé de compte", "Demande de relevé de compte",
+  "N_CPT:Numéro du compte|PERIODE:Période souhaitée (ex. janvier à juin 2026)",
+  "Titulaire du compte n° [N_CPT], j'ai l'honneur de solliciter la délivrance de mon relevé de compte pour la période : [PERIODE].",
+  "Monsieur le Directeur de la Banque"),
+L('Banque & Finance', "Opposition carte / chéquier perdu", "Opposition sur carte ou chéquier",
+  "ELEM:Élément perdu:s:ma carte bancaire,mon chéquier|N_CPT:Numéro du compte|DATE_PERTE:Date de la perte:d|CIRC:Circonstances",
+  "Je vous informe de la perte ou du vol de [ELEM], associé au compte n° [N_CPT], survenu le [DATE_PERTE] : [CIRC].\nJe vous prie de procéder immédiatement à son opposition et de m'en délivrer un nouveau.",
+  "Monsieur le Directeur de la Banque"),
+
+/* ---------------- IMPÔTS & TRÉSOR (6) ---------------- */
+L('Impôts & Trésor', "Demande de quitus fiscal", "Demande d'attestation de situation fiscale",
+  "NIF_P:Votre NIF|ENTREPRISE:Entreprise / activité|MOTIF:Motif (marché, banque, appel d'offres...)",
+  "Titulaire du NIF [NIF_P] et exerçant sous l'enseigne [ENTREPRISE], j'ai l'honneur de solliciter la délivrance d'une attestation de situation fiscale (quitus), nécessaire pour : [MOTIF].",
+  "Monsieur le Directeur Général des Impôts"),
+L('Impôts & Trésor', "Demande de délai de paiement d'impôt", "Demande de délai de paiement",
+  "NIF_P:Votre NIF|NATURE:Impôt concerné|MONTANT:Montant dû (F CFA):m|DELAI_SOUHAITE:Délai souhaité|MOTIF:Difficultés rencontrées:a",
+  "Titulaire du NIF [NIF_P], je suis redevable de [NATURE] pour un montant de [MONTANT] F CFA ([MONTANT_L] francs CFA).\nFaisant face à des difficultés de trésorerie : [MOTIF], j'ai l'honneur de solliciter un délai de paiement de [DELAI_SOUHAITE].\nJe m'engage à respecter l'échéancier qui me sera accordé.",
+  "Monsieur le Directeur Général des Impôts"),
+L('Impôts & Trésor', "Contestation d'imposition", "Réclamation contre une imposition",
+  "NIF_P:Votre NIF|NATURE:Impôt contesté|ANNEE:Année d'imposition|MONTANT:Montant réclamé (F CFA):m|ARGUMENTS:Motifs de la contestation:a",
+  "Titulaire du NIF [NIF_P], j'ai reçu un avis d'imposition au titre de [NATURE] pour l'année [ANNEE], d'un montant de [MONTANT] F CFA.\nJe conteste cette imposition pour les motifs suivants : [ARGUMENTS].\nJe sollicite en conséquence sa révision ou son annulation.",
+  "Monsieur le Directeur Général des Impôts"),
+L('Impôts & Trésor', "Déclaration de cessation d'activité", "Cessation d'activité",
+  "NIF_P:Votre NIF|ENTREPRISE:Entreprise|DATE_CESS:Date de cessation:d|MOTIF:Motif",
+  "J'ai l'honneur de vous informer de la cessation de mon activité exercée sous l'enseigne [ENTREPRISE] (NIF [NIF_P]), à compter du [DATE_CESS].\nMotif : [MOTIF].\nJe vous prie de bien vouloir prendre acte de cette cessation et de m'indiquer les formalités à accomplir.",
+  "Monsieur le Directeur Général des Impôts"),
+L('Impôts & Trésor', "Demande de paiement (Trésor public)", "Demande de paiement de facture",
+  "STRUCTURE:Structure débitrice|FACTURE_N:N° de la facture / du marché|OBJ_MARCHE:Objet des prestations|MONTANT:Montant dû (F CFA):m",
+  "Notre entreprise a exécuté pour le compte de [STRUCTURE] les prestations suivantes : [OBJ_MARCHE] (facture / marché n° [FACTURE_N]).\nLe montant de [MONTANT] F CFA ([MONTANT_L] francs CFA) demeure impayé à ce jour.\nNous sollicitons le règlement de cette somme dans les meilleurs délais.",
+  "Monsieur le Directeur National du Trésor et de la Comptabilité Publique", FIN_NOUS, true),
+L('Impôts & Trésor', "Demande de patente", "Demande de patente",
+  "NIF_P:Votre NIF|ACTIVITE:Activité exercée|ADRESSE_ACT:Adresse de l'activité",
+  "J'exerce l'activité de [ACTIVITE] à [ADRESSE_ACT] (NIF [NIF_P]).\nJ'ai l'honneur de solliciter ma prise en charge au titre de la contribution des patentes et la délivrance du document correspondant.",
+  "Monsieur le Directeur Général des Impôts"),
+
+/* ---------------- DOMAINES & FONCIER (4) ---------------- */
+L('Domaines & Foncier', "Demande de titre foncier", "Demande d'immatriculation foncière",
+  "PARCELLE:Description (lot, îlot, quartier)|SUPERFICIE:Superficie (m²)|ORIGINE:Origine du droit (achat, héritage, attribution)|PJ:Pièces jointes:a:Acte de cession ou de vente\nPlan de situation\nCopie de la pièce d'identité",
+  "Je suis propriétaire de la parcelle située à [PARCELLE], d'une superficie de [SUPERFICIE] m², acquise par : [ORIGINE].\nJ'ai l'honneur de solliciter son immatriculation et la délivrance d'un titre foncier à mon nom.",
+  "Monsieur le Directeur Régional des Domaines et du Cadastre"),
+L('Domaines & Foncier', "Demande d'attribution de parcelle", "Demande d'attribution de parcelle",
+  "USAGE:Usage:s:habitation,commercial,agricole,industriel|LOCALITE:Localité souhaitée|SUPERFICIE:Superficie souhaitée (m²)|SITUATION:Votre situation:a",
+  "J'ai l'honneur de solliciter l'attribution d'une parcelle à usage [USAGE], d'environ [SUPERFICIE] m², à [LOCALITE].\nMa situation : [SITUATION].\nJe m'engage à respecter la réglementation foncière et à mettre la parcelle en valeur.",
+  "Monsieur le Maire"),
+L('Domaines & Foncier', "Demande de permis de construire", "Demande de permis de construire",
+  "TERRAIN:Adresse et références du terrain|NATURE:Nature de la construction|SURFACE:Surface bâtie (m²)|PJ:Pièces jointes:a:Titre ou acte de propriété\nPlans de la construction\nCopie de la pièce d'identité",
+  "Propriétaire du terrain situé à [TERRAIN], j'ai l'honneur de solliciter un permis de construire pour : [NATURE], d'une surface de [SURFACE] m².\nJe m'engage à respecter les règles d'urbanisme et les prescriptions techniques.",
+  "Monsieur le Maire"),
+L('Domaines & Foncier', "Demande de bornage", "Demande de bornage de parcelle",
+  "PARCELLE:Description de la parcelle|LIEU_PARC:Quartier / localité|MOTIF:Motif (litige, vente, titre foncier)",
+  "Propriétaire de la parcelle [PARCELLE] située à [LIEU_PARC], j'ai l'honneur de solliciter son bornage par un géomètre du cadastre, en vue de : [MOTIF].\nJe m'engage à régler les frais correspondants.",
+  "Monsieur le Chef du Bureau du Cadastre"),
+
+/* ---------------- POLICE & JUSTICE (4) ---------------- */
+L('Police & Justice', "Main courante / déclaration", "Déclaration de faits (main courante)",
+  "FAITS:Exposé des faits:a|DATE_FAITS:Date des faits:d|LIEU_FAITS:Lieu des faits",
+  "J'ai l'honneur de porter à votre connaissance les faits suivants, survenus le [DATE_FAITS] à [LIEU_FAITS] : [FAITS].\nJe souhaite que ces faits soient consignés sur le registre de main courante, sans engager de poursuites pour le moment.",
+  "Monsieur le Commissaire de Police"),
+L('Police & Justice', "Demande de copie de jugement", "Demande de copie de jugement",
+  "JUGEMENT:Référence du jugement (n°, date)|PARTIES:Parties concernées|JURIDICTION:Juridiction",
+  "J'ai l'honneur de solliciter la délivrance d'une copie du jugement référencé [JUGEMENT], rendu par [JURIDICTION] dans l'affaire opposant : [PARTIES].\nJe m'engage à régler les frais de timbres et de greffe.",
+  "Monsieur le Greffier en Chef"),
+L('Police & Justice', "Requête au tribunal", "Requête",
+  "OBJ_REQ:Objet de la requête:a|EXPOSE:Exposé des faits:a",
+  "J'ai l'honneur de vous exposer ce qui suit : [EXPOSE].\nEn conséquence, je sollicite de votre haute bienveillance : [OBJ_REQ].\nJe joins à la présente les pièces justificatives.",
+  "Monsieur le Président du Tribunal"),
+L('Police & Justice', "Autorisation de réunion / manifestation", "Demande d'autorisation de réunion",
+  "EVENEMENT:Nature de l'événement|DATE_EV:Date:d|LIEU_EV:Lieu|PARTICIPANTS:Nombre de participants",
+  "J'ai l'honneur de solliciter l'autorisation d'organiser [EVENEMENT], le [DATE_EV] à [LIEU_EV], avec environ [PARTICIPANTS] participants.\nJe m'engage à garantir le bon ordre et à respecter la réglementation en vigueur.",
+  "Monsieur le Préfet"),
+
+/* ---------------- SANTÉ (2) ---------------- */
+L('Santé', "Demande de certificat médical", "Demande de certificat médical",
+  "MOTIF:Motif (aptitude, arrêt de travail, voyage...)",
+  "J'ai l'honneur de solliciter la délivrance d'un certificat médical nécessaire pour : [MOTIF].\nJe me présenterai à la consultation à la date que vous voudrez bien m'indiquer.",
+  "Monsieur le Médecin Chef"),
+L('Santé', "Demande de dossier médical", "Demande de copie de dossier médical",
+  "PATIENT:Nom du patient|PERIODE:Période concernée|MOTIF:Motif de la demande",
+  "J'ai l'honneur de solliciter la copie du dossier médical de [PATIENT] pour la période [PERIODE], en vue de : [MOTIF].",
+  "Monsieur le Médecin Chef"),
+
+/* ---------------- ASSURANCE (3) ---------------- */
+L('Assurance', "Déclaration de sinistre", "Déclaration de sinistre",
+  "N_POLICE:N° de police d'assurance|DATE_SIN:Date du sinistre:d|LIEU_SIN:Lieu du sinistre|DESCRIPTION:Description et dégâts:a",
+  "Assuré(e) sous la police n° [N_POLICE], je vous déclare le sinistre survenu le [DATE_SIN] à [LIEU_SIN] : [DESCRIPTION].\nJe vous prie de bien vouloir diligenter une expertise et me faire connaître la suite réservée à mon dossier.",
+  "Monsieur le Directeur de la compagnie d'assurance"),
+L('Assurance', "Demande de remboursement", "Demande de remboursement",
+  "N_POLICE:N° de police|OBJ_REMB:Objet du remboursement|MONTANT:Montant (F CFA):m",
+  "Assuré(e) sous la police n° [N_POLICE], j'ai l'honneur de solliciter le remboursement de : [OBJ_REMB], pour un montant de [MONTANT] F CFA ([MONTANT_L] francs CFA).\nJe joins les justificatifs.",
+  "Monsieur le Directeur de la compagnie d'assurance"),
+L('Assurance', "Résiliation de contrat d'assurance", "Résiliation de contrat d'assurance",
+  "N_POLICE:N° de police|DATE_EFFET:Date d'effet souhaitée:d|MOTIF:Motif",
+  "J'ai l'honneur de vous notifier la résiliation de mon contrat d'assurance n° [N_POLICE], à compter du [DATE_EFFET], pour le motif suivant : [MOTIF].\nJe vous prie de m'en accuser réception.",
+  "Monsieur le Directeur de la compagnie d'assurance"),
+
+/* ---------------- DOUANE & TRANSPORT (3) ---------------- */
+L('Douane & Transport', "Demande d'exonération douanière", "Demande d'exonération de droits de douane",
+  "MARCHANDISES:Marchandises concernées:a|VALEUR:Valeur estimée (F CFA):m|PROVENANCE:Provenance|MOTIF:Motif de l'exonération",
+  "J'ai l'honneur de solliciter l'exonération des droits et taxes de douane sur : [MARCHANDISES], en provenance de [PROVENANCE], d'une valeur de [VALEUR] F CFA.\nMotif : [MOTIF].",
+  "Monsieur le Directeur Général des Douanes"),
+L('Douane & Transport', "Demande d'agrément de transport", "Demande d'agrément de transport",
+  "ACTIVITE_T:Type de transport (marchandises, voyageurs...)|VEHICULES:Véhicules concernés (immatriculation, type):a",
+  "J'ai l'honneur de solliciter un agrément pour exercer l'activité de transport de [ACTIVITE_T] avec les véhicules suivants : [VEHICULES].\nJe m'engage à respecter la réglementation des transports.",
+  "Monsieur le Directeur des Transports"),
+L('Douane & Transport', "Demande de duplicata de carte grise", "Demande de duplicata de carte grise",
+  "IMMAT:Immatriculation|MARQUE:Marque et type|MOTIF:Motif (perte, vol, détérioration)",
+  "Propriétaire du véhicule [MARQUE], immatriculé [IMMAT], j'ai l'honneur de solliciter un duplicata de la carte grise, l'original ayant été perdu ou détérioré : [MOTIF].",
+  "Monsieur le Directeur des Transports"),
+
+/* ---------------- ASSOCIATION & ENTREPRISE (4) ---------------- */
+L('Association & Entreprise', "Demande de récépissé d'association", "Demande de récépissé de déclaration d'association",
+  "NOM_ASSO:Nom de l'association|SIEGE:Siège|OBJECTIFS:Objectifs:a|PJ:Pièces jointes:a:Statuts\nRèglement intérieur\nPV de l'assemblée constitutive\nListe des membres du bureau",
+  "J'ai l'honneur de vous déclarer la création de l'association [NOM_ASSO], dont le siège est à [SIEGE].\nElle a pour objectifs : [OBJECTIFS].\nJe sollicite la délivrance du récépissé de déclaration.",
+  "Monsieur le Ministre de l'Administration Territoriale"),
+D('Association & Entreprise', "Convocation d'assemblée générale", "ASSO:Nom de l'association / société:t:@nom|DATE_AG:Date de l'assemblée:d|HEURE:Heure|LIEU_AG:Lieu|ORDRE:Ordre du jour:a",
+  "Les membres de [ASSO] sont convoqués en assemblée générale le [DATE_AG] à [HEURE], à [LIEU_AG].\nOrdre du jour :\n[ORDRE]\nVotre présence est indispensable. En cas d'empêchement, vous pouvez donner pouvoir à un autre membre.",
+  {tdoc:"CONVOCATION À L'ASSEMBLÉE GÉNÉRALE"}),
+L('Association & Entreprise', "Demande de partenariat", "Proposition de partenariat",
+  "PROJET:Présentation de votre structure / projet:a|PROPOSITION:Ce que vous proposez:a",
+  "Nous nous permettons de vous présenter notre structure : [PROJET].\nNous vous proposons un partenariat sur la base suivante : [PROPOSITION].\nNous serions heureux de vous rencontrer pour en discuter.",
+  "Monsieur le Directeur", FIN_NOUS, true),
+L('Association & Entreprise', "Soumission à un appel d'offres", "Soumission - appel d'offres",
+  "REF_AO:Référence de l'appel d'offres|OBJ_AO:Objet de l'appel d'offres|MONTANT:Montant de l'offre (F CFA):m|VALIDITE:Validité de l'offre (ex. 90 jours)",
+  "En réponse à l'appel d'offres n° [REF_AO] relatif à : [OBJ_AO], nous avons l'honneur de soumettre notre offre pour un montant de [MONTANT] F CFA ([MONTANT_L] francs CFA).\nNotre offre reste valable [VALIDITE]. Nous joignons les pièces administratives et techniques exigées.",
+  "Monsieur le Président de la Commission d'ouverture des offres", FIN_NOUS, true),
+
+/* ---------------- ÉTAT CIVIL (3) ---------------- */
+L('État civil', "Demande d'acte de mariage", "Demande d'acte de mariage",
+  "EPOUX:Nom de l'époux|EPOUSE:Nom de l'épouse|DATE_MAR:Date du mariage:d|LIEU_MAR:Lieu du mariage",
+  "J'ai l'honneur de solliciter la délivrance d'une copie de l'acte de mariage de [EPOUX] et de [EPOUSE], célébré le [DATE_MAR] à [LIEU_MAR].",
+  "Monsieur l'Officier d'État Civil"),
+L('État civil', "Demande d'acte de décès", "Demande d'acte de décès",
+  "DEFUNT:Nom du défunt|DATE_DECES:Date du décès:d|LIEU_DECES:Lieu du décès|LIEN:Votre lien de parenté",
+  "En ma qualité de [LIEN], j'ai l'honneur de solliciter la délivrance d'un acte de décès au nom de [DEFUNT], décédé(e) le [DATE_DECES] à [LIEU_DECES].",
+  "Monsieur l'Officier d'État Civil"),
+L('État civil', "Demande de jugement supplétif", "Requête aux fins de jugement supplétif d'acte de naissance",
+  "PERSONNE:Nom de la personne concernée|NAISS:Date de naissance|LIEU_NAISS:Lieu de naissance|PERE:Nom du père|MERE:Nom de la mère|MOTIF:Raison de l'absence d'acte",
+  "J'ai l'honneur de solliciter un jugement supplétif d'acte de naissance au profit de [PERSONNE], né(e) le [NAISS] à [LIEU_NAISS], fils/fille de [PERE] et de [MERE].\nL'acte n'a pas pu être établi pour la raison suivante : [MOTIF].\nJe joins les pièces et témoignages utiles.",
+  "Monsieur le Président du Tribunal"),
+
+/* ---------------- AGRICULTURE (1) ---------------- */
+L('Agriculture', "Demande d'appui agricole", "Demande d'appui (semences, engrais, matériel)",
+  "CULTURE:Cultures pratiquées|SUPERFICIE:Superficie exploitée (ha)|LOCALITE:Localité|BESOIN:Appui demandé:a",
+  "Exploitant(e) agricole à [LOCALITE], je cultive [CULTURE] sur [SUPERFICIE] hectares.\nJ'ai l'honneur de solliciter l'appui suivant : [BESOIN].\nJe m'engage à utiliser cet appui exclusivement pour mon exploitation.",
+  "Monsieur le Directeur Régional de l'Agriculture")
 ];
 
 /* ==================================================================
@@ -646,7 +805,7 @@ async function telechargerWord(){
    8. ACCUEIL : recherche + catégories
    ================================================================== */
 let catActive = 'Tous';
-const ICO = {'Emploi':'💼','Administration':'🏛️','Entreprise Cyber':'🖨️','Scolaire':'🎓','Divers':'✉️','Vente & Commerce':'🛒','Immobilier':'🏠'};
+const ICO = {'Emploi':'💼','Administration':'🏛️','Entreprise Cyber':'🖨️','Scolaire':'🎓','Divers':'✉️','Vente & Commerce':'🛒','Immobilier':'🏠','Banque & Finance':'🏦','Impôts & Trésor':'💰','Domaines & Foncier':'🗺️','Police & Justice':'⚖️','Santé':'🩺','Assurance':'🛡️','Douane & Transport':'🚚','Association & Entreprise':'🤝','État civil':'📜','Agriculture':'🌾'};
 function afficherAccueil(){
   const cats = ['Tous', ...new Set(MODELES.map(m => m.cat))];
   $('#cats').innerHTML = cats.map(c => `<button class="${c === catActive ? 'on' : ''}" data-c="${esc(c)}">${esc(c)}${c === 'Tous' ? ' (' + MODELES.length + ')' : ''}</button>`).join('');
