@@ -48,7 +48,7 @@
     '.fp-item .btn{padding:6px 10px;font-size:.85rem}',
     '.fp-banner{background:#fff8e1;border:1px solid #f0d78c;border-radius:8px;padding:8px 12px;margin:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}',
     '.fp-banner .btn{padding:5px 10px;font-size:.85rem}',
-    '.fp-ia{background:none;border:0;color:#6d28d9;cursor:pointer;font-size:.82rem;text-align:left;padding:2px 0}',
+    '.fp-ia{align-self:flex-start;background:#f5f0ff;border:1px solid #7c3aed;border-radius:8px;color:#6d28d9;cursor:pointer;font-size:.9rem;font-weight:600;padding:7px 12px;margin-top:6px}',
     '.fp-ia:disabled{color:#999;cursor:wait}',
     '.fp-table{width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0}',
     '.fp-table th,.fp-table td{border-bottom:1px solid var(--bord);padding:5px 6px;text-align:left}',
@@ -324,8 +324,9 @@
   /* ---------- 8. Assistant IA de rédaction (facultatif) ---------- */
   function brancherIA() {
     $$('#champs textarea').forEach(t => {
+      if (/DESTINATAIRE|ADRESSE|LIMITES|SIGNATAIRE|LIEU/.test(t.dataset.k || '')) return;   // pas utile sur ces champs
       const b = document.createElement('button');
-      b.type = 'button'; b.className = 'fp-ia'; b.textContent = '✨ Rédiger ou améliorer avec l\'IA';
+      b.type = 'button'; b.className = 'fp-ia'; b.textContent = '✨ Écrire ce texte avec l\'IA';
       b.onclick = async () => {
         if (!navigator.onLine) return alert('L\'assistant IA a besoin d\'une connexion internet.');
         const base = t.value.trim(); let consigne = '';
@@ -336,7 +337,7 @@
           const r = await fetch('/api/redacteur-ia', {method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({modele: modele.titre, champ: lab, texte: base, consigne: consigne})});
           const d = await r.json().catch(() => ({}));
-          if (!r.ok || !d.text) throw new Error(d.error || 'service indisponible');
+          if (!r.ok || !d.text) throw new Error(r.status === 404 || r.status === 405 ? "le fichier api/redacteur-ia.js n'est pas installé sur le site" : r.status === 503 ? 'la clé GEMINI_API_KEY n\'est pas configurée dans Vercel' : (d.error || 'service indisponible, code ' + r.status));
           t.value = d.text; sauverBrouillon();
         } catch (e) { alert('L\'assistant IA n\'est pas disponible pour le moment (' + e.message + ').'); }
         b.disabled = false; b.textContent = avant;
