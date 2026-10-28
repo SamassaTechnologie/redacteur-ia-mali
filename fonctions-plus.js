@@ -334,6 +334,21 @@
   };
 
   /* ---------- 8. Assistant IA de rédaction (facultatif) ---------- */
+  // Accès payant : l'assistant IA demande un code d'accès (vendu par le cyber) après les essais gratuits du jour
+  function demanderCode(message, raison, reessayer) {
+    if (raison !== 'requis') { try { localStorage.removeItem('code_acces'); } catch (e) {} }
+    const d = dlg('dlgCode', 'Assistant IA : code d\'accès',
+      '<p>' + esc(message || 'Entrez votre code d\'accès.') + '</p>' +
+      '<p class="aide">Le code s\'achète auprès de <b>' + esc(P.nom) + '</b>' + (P.tel ? ' – Tél : <b>' + esc(P.tel) + '</b>' : '') +
+      ' (Orange Money ou Wave). Il donne accès à l\'assistant IA pendant 1, 7 ou 30 jours. Les modèles de documents restent gratuits.</p>' +
+      '<label class="champ"><span>Code d\'accès</span><input id="inCode" placeholder="SAM-XXX-XXXX-XXXXXXXXXX" autocapitalize="characters" autocomplete="off"></label>' +
+      '<div class="actions"><button type="button" class="btn vert" id="bCode">Valider</button></div>');
+    d.querySelector('#bCode').onclick = () => {
+      const c = d.querySelector('#inCode').value.trim().toUpperCase().replace(/\s+/g, '');
+      if (!/^SAM-[0-9A-Z]{1,6}-[0-9A-F]{4}-[0-9A-F]{10}$/.test(c)) return alert('Ce code n\'a pas le bon format. Vérifiez-le.');
+      LS.set('code_acces', c); d.close(); reessayer();
+    };
+  }
   function brancherIA() {
     $$('#champs textarea').forEach(t => {
       if (/DESTINATAIRE|ADRESSE|LIMITES|SIGNATAIRE|LIEU/.test(t.dataset.k || '')) return;   // pas utile sur ces champs
@@ -346,9 +361,10 @@
         const lab = t.closest('label').querySelector('span').textContent.replace(/\s*\[.*?\]\s*$/, '');
         b.disabled = true; const avant = b.textContent; b.textContent = 'Rédaction en cours…';
         try {
-          const r = await fetch('/api/redacteur-ia', {method: 'POST', headers: {'Content-Type': 'application/json'},
+          const r = await fetch('/api/redacteur-ia', {method: 'POST', headers: Object.assign({'Content-Type': 'application/json'}, LS.get('code_acces', '') ? {'x-code-acces': LS.get('code_acces', '')} : {}),
             body: JSON.stringify({modele: modele.titre, champ: lab, texte: base, consigne: consigne})});
           const d = await r.json().catch(() => ({}));
+          if (r.status === 402) { b.disabled = false; b.textContent = avant; return demanderCode(d.error, d.code, () => b.click()); }
           if (!r.ok || !d.text) throw new Error(r.status === 404 || r.status === 405 ? "le fichier api/redacteur-ia.js n'est pas installé sur le site" : r.status === 503 ? 'la clé GEMINI_API_KEY n\'est pas configurée dans Vercel' : (d.error || 'service indisponible, code ' + r.status));
           t.value = d.text; sauverBrouillon();
         } catch (e) { alert('L\'assistant IA n\'est pas disponible pour le moment (' + e.message + ').'); }

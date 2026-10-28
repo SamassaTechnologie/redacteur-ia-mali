@@ -1,20 +1,17 @@
-// api/redacteur-ia.js  v1.2  (fonction Node.js Vercel)
+// api/redacteur-ia.js  v1.3  (fonction Node.js Vercel)
 // Assistant de rédaction (facultatif) : Google Gemini (priorité) + Anthropic (secours)
 // Variables Vercel : GEMINI_API_KEY et/ou ANTHROPIC_API_KEY
-// Facultatif : GEMINI_MODELS (modèles séparés par des virgules, ex. "gemini-3.5-flash,gemini-2.5-flash")
-//              ANTHROPIC_MODEL, LIMITE_PAR_HEURE (défaut 20 requêtes par visiteur et par heure)
+// Accès payant : ACCESS_SECRET (signature des codes) et ADMIN_PASSWORD (génération des codes, api/admin-code.js)
+// Facultatif : GEMINI_MODELS (ex. "gemini-3.5-flash,gemini-2.5-flash"), ANTHROPIC_MODEL,
+//              LIMITE_GRATUIT_PAR_JOUR (défaut 2), LIMITE_CODE_PAR_HEURE (défaut 40)
 
 const MODELES_GEMINI = (process.env.GEMINI_MODELS || 'gemini-3.5-flash,gemini-2.5-flash,gemini-flash-latest')
   .split(',').map(x => x.trim()).filter(Boolean);
 const MODELE_ANTHROPIC = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
-const LIMITE = parseInt(process.env.LIMITE_PAR_HEURE, 10) || 20;
-const compteurs = new Map();   // limite simple en mémoire (par instance) : freine les abus sans base de données
-function tropDeRequetes(ip) {
-  const maintenant = Date.now(), c = compteurs.get(ip);
-  if (compteurs.size > 5000) for (const [k, v] of compteurs) if (maintenant > v.fin) compteurs.delete(k);
-  if (!c || maintenant > c.fin) { compteurs.set(ip, { n: 1, fin: maintenant + 3600e3 }); return false; }
-  return ++c.n > LIMITE;
-}
+const { verifierCode, limiteur } = require('./_acces');
+const LIMITE_GRATUIT = parseInt(process.env.LIMITE_GRATUIT_PAR_JOUR, 10) || 2;   // essais gratuits par visiteur et par jour
+const LIMITE_CODE = parseInt(process.env.LIMITE_CODE_PAR_HEURE, 10) || 40;        // avec un code valide
+const trop = limiteur();
 
 const SYSTEM_PROMPT = `Tu aides à rédiger des documents administratifs et commerciaux au Mali (lettres, attestations, contrats, demandes).
 
@@ -39,7 +36,15 @@ module.exports = async function handler(req, res) {
   }
 
   const ip = String(req.headers['x-forwarded-for'] || req.socket && req.socket.remoteAddress || '?').split(',')[0].trim();
-  if (tropDeRequetes(ip)) return fin(429, { error: "Trop de demandes. Réessayez dans une heure." });
+  const codeBrut = String(req.headers['x-code-acces'] || '').slice(0, 40);
+  let acces = null;
+  if (codeBrut) {
+    acces = verifierCode(codeBrut);
+    if (!acces.ok) return fin(402, { error: acces.raison === 'expire' ? 'Ce code d\'accès a expiré.' : 'Code d\'accès invalide.', code: acces.raison });
+    if (trop('c:' + codeBrut.toUpperCase(), LIMITE_CODE, 3600e3)) return fin(429, { error: 'Trop de demandes avec ce code. Réessayez dans une heure.' });
+  } else if (trop('g:' + ip, LIMITE_GRATUIT, 86400e3)) {
+    return fin(402, { error: 'Vos essais gratuits du jour sont utilisés. Entrez un code d\'accès pour continuer.', code: 'requis' });
+  }
 
   const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
   const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
@@ -87,7 +92,7 @@ module.exports = async function handler(req, res) {
       if (d && d.content && d.content[0] && d.content[0].text) text = d.content[0].text;
     }
     if (!text) return fin(502, { error: "l'IA n'a pas pu répondre (vérifiez la clé API)" });
-    return fin(200, { success: true, text: text.trim().replace(/^["«]\s*|\s*["»]$/g, '') });
+    return fin(200, { success: true, expire: acces ? acces.expire : null, text: text.trim().replace(/^["«]\s*|\s*["»]$/g, '') });
   } catch (err) {
     return fin(400, { error: 'requête invalide' });
   }

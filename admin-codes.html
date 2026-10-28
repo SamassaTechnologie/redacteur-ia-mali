@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Codes d'accès – Rédacteur IA Mali</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#f4f8fb;margin:0;padding:16px;color:#16324a}
+main{max-width:460px;margin:0 auto;background:#fff;border:1px solid #d7e2ec;border-radius:12px;padding:18px}
+h1{font-size:1.2rem;margin:0 0 4px}p.s{color:#5b7084;margin:0 0 14px;font-size:.9rem}
+label{display:block;margin:10px 0 4px;font-weight:600;font-size:.9rem}
+input,select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #b8c9d8;border-radius:8px;font-size:1rem}
+button{width:100%;margin-top:14px;padding:12px;border:0;border-radius:8px;background:#0b6fb8;color:#fff;font-size:1rem;font-weight:600}
+button.sec{background:#e7f0f8;color:#0b6fb8;margin-top:8px}
+#res{margin-top:16px;padding:14px;border-radius:10px;background:#eaf7ee;border:1px solid #9fd5ae;display:none}
+#code{font-size:1.25rem;font-weight:700;letter-spacing:.5px;word-break:break-all;margin:6px 0}
+#err{color:#b00020;margin-top:10px;display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Générer un code d'accès</h1>
+  <p class="s">Réservé au propriétaire. Le client paie (Orange Money ou Wave), vous lui envoyez le code.</p>
+  <label for="mdp">Mot de passe administrateur</label>
+  <input id="mdp" type="password" autocomplete="current-password">
+  <label for="jours">Durée (prix à votre choix)</label>
+  <select id="jours"><option value="1">1 jour</option><option value="7">7 jours</option><option value="30">30 jours</option></select>
+  <button id="go" type="button">Créer le code</button>
+  <div id="err"></div>
+  <div id="res">
+    <div>Code valable jusqu'au <b id="exp"></b> :</div>
+    <div id="code"></div>
+    <button id="copier" class="sec" type="button">Copier le code</button>
+    <button id="wa" class="sec" type="button">Envoyer par WhatsApp</button>
+  </div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+let courant = '';
+$('#go').onclick = async () => {
+  $('#err').style.display = 'none'; $('#res').style.display = 'none'; $('#go').disabled = true;
+  try {
+    const r = await fetch('/api/admin-code', {method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({motdepasse: $('#mdp').value, jours: +$('#jours').value})});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Erreur');
+    courant = d.code; $('#code').textContent = d.code; $('#exp').textContent = d.expire.split('-').reverse().join('/');
+    $('#res').style.display = 'block';
+  } catch (e) { $('#err').textContent = e.message; $('#err').style.display = 'block'; }
+  $('#go').disabled = false;
+};
+$('#copier').onclick = async () => { try { await navigator.clipboard.writeText(courant); $('#copier').textContent = 'Copié ✔'; } catch (e) { prompt('Copiez ce code :', courant); } };
+$('#wa').onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent('Votre code d\'accès à l\'assistant IA (Rédacteur IA Mali) : ' + courant + '\nValable jusqu\'au ' + $('#exp').textContent + '.\nSite : ' + location.origin), '_blank');
+</script>
+</body>
+</html>
