@@ -224,9 +224,9 @@
     const auj = AUJ(), il7 = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10);
     const T = somme(k => k === auj), S = somme(k => k >= il7), M = somme(k => k.startsWith(auj.slice(0, 7))), A = somme(() => true);
     const carte = (l, x) => '<div>' + l + '<b>' + fmt(x.r) + ' F</b><small>' + x.n + ' impression(s)</small></div>';
-    const d = dlg('dlgBilan', 'Bilan des recettes',
+    const d = dlg('dlgBilan', 'Bilan des impressions (estimation)',
       '<div class="fp-resume">' + carte('Aujourd\'hui', T) + carte('7 derniers jours', S) + carte('Ce mois', M) + carte('Depuis le début', A) + '</div>' +
-      '<div class="fp-liste"><table class="fp-table"><tr><th>Date</th><th class="n">Impressions</th><th class="n">Recette</th></tr>' +
+      '<div class="fp-liste"><table class="fp-table"><tr><th>Date</th><th class="n">Impressions</th><th class="n">Estimation</th></tr>' +
       (ks.slice(0, 31).map(k => '<tr><td>' + jourFR(k) + '</td><td class="n">' + j[k].n + '</td><td class="n">' + fmt(j[k].r) + ' F</td></tr>').join('') ||
        '<tr><td colspan="3">Aucune impression enregistrée. Le bilan se remplit à chaque clic sur « Imprimer ».</td></tr>') +
       '</table></div><div class="actions"><button type="button" class="btn vert" id="bCsv">⬇ Exporter en CSV</button></div>');
@@ -240,7 +240,7 @@
     const L = [[P.nom], [P.slogan], [P.adresse + ' - Tél. ' + P.tel], [''], ['BILAN DES IMPRESSIONS ET RECETTES'],
       ['Généré le', now.toLocaleDateString('fr-FR') + ' à ' + now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})],
       ['Période couverte', 'du ' + jourFR(ks[0]) + ' au ' + jourFR(ks[ks.length - 1])], ['Devise', 'FCFA'], [''],
-      ['Date', "Nombre d'impressions", 'Recette (FCFA)']];
+      ['Date', "Nombre d'impressions", 'Estimation (FCFA)']];
     ks.forEach(k => L.push([jourFR(k), j[k].n, j[k].r]));
     L.push([''], ['TOTAL', tn, tr]);
     sauver('Bilan-impressions_' + slug(P.nom) + '_' + AUJ() + '.csv',
@@ -272,7 +272,19 @@
           const o = JSON.parse(r.result);
           if (o.app !== 'redacteur-ia-mali' || !o.data) throw new Error('fichier non reconnu');
           if (!confirm('Restaurer cette sauvegarde ? Les données actuelles de même nom seront remplacées.')) return;
-          Object.keys(o.data).forEach(k => { try { localStorage.setItem(k, o.data[k]); } catch (x) {} });
+          // Validation : clés courtes, valeurs texte JSON valides et de taille raisonnable, logo = image PNG/JPEG uniquement
+          if (typeof o.data !== 'object' || Array.isArray(o.data)) throw new Error('données invalides');
+          let total = 0, ok = 0, ignores = 0;
+          Object.keys(o.data).forEach(k => {
+            const v = o.data[k];
+            const valide = /^[A-Za-z0-9_\-]{1,60}$/.test(k) && typeof v === 'string' && v.length <= 2e6 &&
+              (total += v.length) <= 4e6 &&
+              (k !== 'logo' || /^"data:image\/(png|jpeg);base64,[A-Za-z0-9+\/=]+"$/.test(v));
+            let json = valide; if (valide) { try { JSON.parse(v); } catch (x) { json = false; } }
+            if (json) { try { localStorage.setItem(k, v); ok++; } catch (x) { ignores++; } } else ignores++;
+          });
+          if (!ok) throw new Error('aucune donnée valide dans ce fichier');
+          if (ignores) alert(ok + ' élément(s) restauré(s), ' + ignores + ' ignoré(s) car invalide(s).');
           location.reload();
         } catch (x) { alert('Restauration impossible : ' + x.message); }
       };

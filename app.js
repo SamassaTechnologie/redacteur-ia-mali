@@ -9,6 +9,7 @@
 /* ---------- 0. OUTILS ---------- */
 const $  = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
+const logoSur = v => (typeof v === 'string' && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+\/=]+$/.test(v)) ? v : 'logo.png';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const fmt = n => String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');   // 1 500 000
@@ -840,7 +841,7 @@ function blocHtml(b){
 }
 const pied = () => `${P.nom} – ${P.adresse} – Tél : ${P.tel} – ${P.email}${P.nif ? ' – NIF : ' + P.nif : ''}${P.rccm ? ' – RCCM : ' + P.rccm : ''}`;
 function apercuHtml(B){
-  const logo = LS.get('logo', null) || 'logo.png';
+  const logo = logoSur(LS.get('logo', null));
   const texte = `<div><b>${esc(P.nom)}</b><i>${esc(P.slogan)}</i><small>Tél : ${esc(P.tel)} – ${esc(P.email)}</small></div>`;
   const ent = (OPT.entete || OPT.logo) ? `<div class="ent">${OPT.logo ? `<img src="${logo}" alt="">` : ''}${OPT.entete ? texte : ''}</div>` : '';
   const bas = OPT.pied ? `<div class="pied">${esc(pied())}</div>` : '';
@@ -856,7 +857,7 @@ function apercuHtml(B){
 let logoCache = null;
 async function logoInfo(){ // logo (PNG) + dimensions, pour l'en-tête Word
   if (logoCache) return logoCache;
-  const src = LS.get('logo', null) || 'logo.png';
+  const src = logoSur(LS.get('logo', null));
   try {
     const buf = new Uint8Array(await (await fetch(src)).arrayBuffer());
     const dim = await new Promise(res => { const im = new Image(); im.onload = () => res([im.width, im.height]); im.onerror = () => res([1, 1]); im.src = src; });
@@ -1004,7 +1005,7 @@ $('#pLogo').onchange = e => { // le logo est réduit (hauteur 150 px) pour tenir
   im.onload = () => {
     const h = Math.min(150, im.height), w = Math.round(im.width * h / im.height), c = document.createElement('canvas');
     c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h);
-    LS.set('logo', c.toDataURL('image/png')); logoCache = null; $('.brand img').src = LS.get('logo', 'logo.png');
+    LS.set('logo', c.toDataURL('image/png')); logoCache = null; $('.brand img').src = logoSur(LS.get('logo', null));
   };
   im.src = URL.createObjectURL(f);
 };
@@ -1024,6 +1025,6 @@ $('#btnInstall').onclick = async () => { if (evtInstall) { evtInstall.prompt(); 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 /* ---------- Démarrage ---------- */
-if (LS.get('logo', null)) $('.brand img').src = LS.get('logo');
+if (LS.get('logo', null)) $('.brand img').src = logoSur(LS.get('logo'));
 majCompteur();
 afficherAccueil();
