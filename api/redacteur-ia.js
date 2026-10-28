@@ -1,6 +1,20 @@
-// api/redacteur-ia.js  v1.1  (fonction Node.js Vercel)
+// api/redacteur-ia.js  v1.2  (fonction Node.js Vercel)
 // Assistant de rédaction (facultatif) : Google Gemini (priorité) + Anthropic (secours)
 // Variables Vercel : GEMINI_API_KEY et/ou ANTHROPIC_API_KEY
+// Facultatif : GEMINI_MODELS (modèles séparés par des virgules, ex. "gemini-3.5-flash,gemini-2.5-flash")
+//              ANTHROPIC_MODEL, LIMITE_PAR_HEURE (défaut 20 requêtes par visiteur et par heure)
+
+const MODELES_GEMINI = (process.env.GEMINI_MODELS || 'gemini-3.5-flash,gemini-2.5-flash,gemini-flash-latest')
+  .split(',').map(x => x.trim()).filter(Boolean);
+const MODELE_ANTHROPIC = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
+const LIMITE = parseInt(process.env.LIMITE_PAR_HEURE, 10) || 20;
+const compteurs = new Map();   // limite simple en mémoire (par instance) : freine les abus sans base de données
+function tropDeRequetes(ip) {
+  const maintenant = Date.now(), c = compteurs.get(ip);
+  if (compteurs.size > 5000) for (const [k, v] of compteurs) if (maintenant > v.fin) compteurs.delete(k);
+  if (!c || maintenant > c.fin) { compteurs.set(ip, { n: 1, fin: maintenant + 3600e3 }); return false; }
+  return ++c.n > LIMITE;
+}
 
 const SYSTEM_PROMPT = `Tu aides à rédiger des documents administratifs et commerciaux au Mali (lettres, attestations, contrats, demandes).
 
@@ -24,6 +38,9 @@ module.exports = async function handler(req, res) {
     catch (e) { return fin(403, { error: 'Origine non autorisée' }); }
   }
 
+  const ip = String(req.headers['x-forwarded-for'] || req.socket && req.socket.remoteAddress || '?').split(',')[0].trim();
+  if (tropDeRequetes(ip)) return fin(429, { error: "Trop de demandes. Réessayez dans une heure." });
+
   const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
   const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
   if (!GEMINI_KEY && !ANTHROPIC_KEY) return fin(503, { error: 'clé API non configurée' });
@@ -43,11 +60,11 @@ module.exports = async function handler(req, res) {
 
     let text = '';
     if (GEMINI_KEY) {
-      for (const mdl of ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']) {
+      for (const mdl of MODELES_GEMINI) {
         try {
-          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent?key=${GEMINI_KEY}`, {
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_KEY },
             body: JSON.stringify({
               system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
               contents: [{ parts: [{ text: prompt }] }],
@@ -64,7 +81,7 @@ module.exports = async function handler(req, res) {
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 400, system: SYSTEM_PROMPT, messages: [{ role: 'user', content: prompt }] })
+        body: JSON.stringify({ model: MODELE_ANTHROPIC, max_tokens: 400, system: SYSTEM_PROMPT, messages: [{ role: 'user', content: prompt }] })
       });
       const d = await r.json();
       if (d && d.content && d.content[0] && d.content[0].text) text = d.content[0].text;
