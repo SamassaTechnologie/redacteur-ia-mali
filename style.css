@@ -94,3 +94,5 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 
 /* Mode particulier : on masque ce qui ne sert qu'au cyber */
 body.public .cyber-only, body.public #btnBilan{display:none!important}
+.pied-site{text-align:center;font-size:.8rem;color:#5b7084;padding:14px 12px 22px}.pied-site a{color:#0b6fb8}
+@media print{.pied-site{display:none}}
