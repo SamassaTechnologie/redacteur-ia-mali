@@ -957,6 +957,8 @@ async function telechargerWord(){
    8. ACCUEIL : recherche + catégories
    ================================================================== */
 let catActive = 'Tous';
+// Recherche : tous les mots doivent apparaître (titre, catégorie, objet ou intitulé du document)
+const correspond = (m, q) => !q || q.split(/\s+/).every(w => norm(`${m.titre} ${m.cat} ${m.objet || ''} ${m.tdoc || ''} ${m.lib || ''}`).includes(w));
 const ICO = {'Emploi':'💼','Administration':'🏛️','Entreprise Cyber':'🖨️','Scolaire':'🎓','Divers':'✉️','Vente & Commerce':'🛒','Immobilier':'🏠','Banque & Finance':'🏦','Impôts & Trésor':'💰','Domaines & Foncier':'🗺️','Police & Justice':'⚖️','Santé':'🩺','Assurance':'🛡️','Douane & Transport':'🚚','Association & Entreprise':'🤝','État civil':'📜','Agriculture':'🌾','Services Cyber':'🖥️','Télécom & Énergie':'💡','Social & Retraite':'👴'};
 function afficherAccueil(){
   const cats = ['Tous', ...new Set(MODELES.map(m => m.cat))];
@@ -964,7 +966,7 @@ function afficherAccueil(){
   $$('#cats button').forEach(b => b.onclick = () => { catActive = b.dataset.c; afficherAccueil(); });
   const q = norm($('#recherche').value.trim());
   $('#liste').innerHTML = MODELES.map((m, i) => ({m, i}))
-    .filter(({m}) => (catActive === 'Tous' || m.cat === catActive) && (!q || norm(m.titre + ' ' + m.cat).includes(q)))
+    .filter(({m}) => (catActive === 'Tous' || m.cat === catActive) && correspond(m, q))
     .map(({m, i}) => `<button class="carte" data-i="${i}"><b>${ICO[m.cat] || '📄'} ${esc(m.titre)}</b><small>${esc(m.cat)}</small></button>`).join('')
     || '<p>Aucun modèle trouvé.</p>';
   $$('#liste .carte').forEach(b => b.onclick = () => ouvrir(+b.dataset.i));
